@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR OTP Login</title>
+
+    <!-- QRCode library -->
+    <script src="qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 35px;
+            width: 360px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-size: 22px;
+            color: #222;
+            font-weight: 600;
+        }
+
+        input {
+            width: 92%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #0078d7;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 20px;
+            width: 100%;
+            background: #0078d7;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #005ea3;
+        }
+
+        #qrcode {
+            margin-top: 20px;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        #otpSection {
+            display: none;
+            margin-top: 20px;
+        }
+
+        #otpInput {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Login with OTP</h2>
+        <form id="loginForm">
+            <input type="text" id="name" placeholder="Enter Name" required>
+            <input type="text" id="phone" placeholder="Enter Phone Number" required>
+            <button type="submit" id="sbtn" style="display:block;">Generate QR</button>
+        </form>
+
+        <center>
+            <div id="qrcode"></div>
+            <p id="status"></p>
+        </center>
+
+        <!-- Enter OTP Button -->
+        <button id="otpBtn" style="display:none;">Enter OTP</button>
+
+        <!-- OTP Section -->
+        <div id="otpSection">
+            <input type="text" id="otpInput" placeholder="Enter OTP">
+            <button id="verifyOtpBtn">Verify OTP</button>
+            <p id="otpError" style="color:red;"></p>
+        </div>
+    </div>
+
+    <script>
+    const form = document.getElementById("loginForm");
+    const otpBtn = document.getElementById("otpBtn");
+    const otpSection = document.getElementById("otpSection");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    const submitBtn = document.getElementById("sbtn");
+    let generatedOtp = "";
+
+    // Generate 6-digit OTP
+    function generateOTP() {
+        return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    // Handle form submit (Generate QR)
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+
+        if (name && phone.length === 10 && !isNaN(phone)) {
+            generatedOtp = generateOTP(); // Create OTP
+            document.getElementById("status").innerText = "✅ QR Code Generated with OTP";
+
+            // Hide the Generate QR button
+            submitBtn.style.display = "none";
+
+            // Show QR code
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: generatedOtp,
+                width: 200,
+                height: 200
+            });
+
+            qrContainer.removeAttribute("title");
+
+            otpBtn.style.display = "block"; // Show Enter OTP button
+        } else {
+            document.getElementById("status").innerText = "❌ Enter valid Name & 10-digit Phone";
+            document.getElementById("qrcode").innerHTML = "";
+            otpBtn.style.display = "none";
+            otpSection.style.display = "none";
+        }
+    });
+
+    // Show OTP Input when clicking Enter OTP
+    otpBtn.addEventListener("click", () => {
+        otpSection.style.display = "block";
+        otpBtn.style.display = "none";
+        document.getElementById("qrcode").innerHTML = ""; // Remove QR
+        document.getElementById("status").innerText = "🔐 Enter the OTP to continue";
+    });
+
+    // Verify OTP
+    verifyOtpBtn.addEventListener("click", () => {
+        const enteredOtp = document.getElementById("otpInput").value.trim();
+        if (enteredOtp === generatedOtp) {
+            window.location.href = "./new/index.html"; // Redirect on success
+        } else {
+            document.getElementById("otpError").innerText = "❌ Incorrect OTP, try again!";
+        }
+    });
+</script>
+
+
+</body>
+
+</html>
